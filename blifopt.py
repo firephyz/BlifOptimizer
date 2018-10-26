@@ -3,19 +3,29 @@
 import sys
 
 class BlifObject:
-  def __init__(self, moduleName):
-    self.moduleName = moduleName
+  pass
 
-  @staticmethod
-  def parse(inputFileName):
-    inputFile = open(inputFileName, 'r')
-    result = inputFile.readline()
-    print(result)
-    return BlifObject('test')
+class BlifParser:
+  def __init__(self, fileName):
+    self.inputFile = open(inputFileName, 'r')self.moduleName = moduleName
+
+  def parse():
+    """Parse the input file into a BlifObject"""
+    modelName = self.parseModelName()
+    inputList = self.parseInputList()
+    outputList = self.parseOutputList()
+    nameList = self.parseNameDecls()
+    return BlifObject(modelName, inputList, outputList, nameList)
+
+  def parseModelName():
+    """Get the model name from the blif file"""
+
+  def parseInputList():
+    """Get the input list from the blif file"""
 
 if len(sys.argv) != 2:
   print('Usage: blifopt.py <blif_file>')
   sys.exit()
 
-blif = BlifObject.parse(sys.argv[1])
-print(blif.moduleName)
+parser = BlifParser(sys.argv[1])
+blif = parser.parse()
