@@ -1,5 +1,7 @@
 """Parses .blif files"""
 
+import sys
+
 class BlifObject:
   """A representation of a .blif file"""
   def __init__(self, modelName, inputList, outputList, gateList):
@@ -35,6 +37,9 @@ class BlifLogicTerm:
     if self.result == '0':
       print("Doesn't currently support a logic term with '0' as output.")
       sys.exit()
+  
+  def __repr__(self):
+    return self.term + ": " + self.result
 
 class BlifParser:
   """Parses a .blif file into a BlifObject"""

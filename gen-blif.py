@@ -10,11 +10,25 @@ def binaryNumGen(maxNum):
             yield num
         num += 1
 
+def addDontCares(numString):
+    numDontCares = int(0.5 * random.random() * numInputs)
+    dontCareIndicies = random.sample(range(numInputs), numDontCares)
+    dontCareIndicies.sort()
+    dontCareIndex = 0
+    result = []
+    for i in range(len(numString)):
+        if len(dontCareIndicies) != 0 and dontCareIndex < numDontCares and i == dontCareIndicies[dontCareIndex]:
+            result.append('-')
+            dontCareIndex += 1
+        else:
+            result.append(numString[i])
+    return ''.join(result)
+
 def genOutputTable():
     result = ''
     numGenerator = binaryNumGen(2**numInputs)
     for i in numGenerator:
-        result += format(i, f'0{numInputs}b')
+        result += addDontCares(format(i, f'0{numInputs}b'))
         result += ' 1\n'
     return result
 
