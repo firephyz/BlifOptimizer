@@ -11,7 +11,7 @@ def binaryNumGen(maxNum):
         num += 1
 
 def addDontCares(numString):
-    numDontCares = int(0.5 * random.random() * numInputs)
+    numDontCares = int(0.3 * random.random() * numInputs)
     dontCareIndicies = random.sample(range(numInputs), numDontCares)
     dontCareIndicies.sort()
     dontCareIndex = 0
