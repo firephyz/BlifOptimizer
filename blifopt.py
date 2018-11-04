@@ -88,21 +88,41 @@ def removeRedundantImplicants(groups):
             otherGroup.remove(testImp)
 
 def combineImplicants(impA, impB):
-  """Combines two implicants. We assume they have
-  the same number of dashes (dontCares)"""
+  """Combines two implicants."""
   hasDiff = False
   diffIndex = -1
+  doesCover = False
+  primaryImplicant = None
+  secondaryImplicant = None
+  if countDontCares(impA) >= countDontCares(impB):
+    primaryImplicant = impA
+    secondaryImplicant = impB
+  elif countDontCares(impA) < countDontCares(impB):
+    primaryImplicant = impB
+    secondaryImplicant = impA
+  
   for i in range(len(impA)):
     if impA[i] != impB[i]:
-      if impA[i] == '-' or impB[i] == '-':
+      if secondaryImplicant[i] == '-':
         return None
-      else:
+      elif primaryImplicant[i] == '-':
         if hasDiff:
           return None
         else:
-          diffIndex = i
-          hasDiff = True
-  return impA[:diffIndex] + '-' + impA[diffIndex + 1:]
+          doesCover = True
+      else:
+        if hasDiff:
+          return None
+        elif primaryImplicant[i] != '-':
+          if doesCover:
+            return None
+          else:
+            diffIndex = i
+            hasDiff = True
+  if hasDiff:
+    return primaryImplicant[:diffIndex] + '-' + primaryImplicant[diffIndex + 1:]
+  else:
+    return primaryImplicant
 
 def findLargerImplicants(groups):
   """Assumes traversal always occurs from lowest indexed group
@@ -114,6 +134,7 @@ def findLargerImplicants(groups):
     group = groups[groupIndex]
     i = 0
     for i in range(len(group)):
+      # Combine in the current group
       for j in range(i + 1, len(group)):
         result = combineImplicants(group[i], group[j])
         if result != None:
@@ -128,10 +149,50 @@ def findLargerImplicants(groups):
             groups.append([])
           
           groups[groupIndex + 1].append(result)
+          print('REMOVED:')
+          print('{0} {1}'.format(groupIndex, group[i]))
+          print('{0} {1}'.format(groupIndex, group[j]))
+          print('ADDED:')
+          print('{0} {1}'.format(groupIndex + 1, result))
+      # Combine with the group above
+      for j in range(1, len(groups) - groupIndex):
+        nextRemovals = []
+        for imp in groups[groupIndex + j]:
+          result = combineImplicants(group[i], imp)
+          if result != None:
+            if result == imp:
+              if group[i] not in removals:
+                removals.append(group[i])
+                print('REMOVED:')
+                print('{0} {1}'.format(groupIndex, group[i]))
+            else:
+              if not didChange: didChange = True
+              if group[i] not in removals:
+                removals.append(group[i])
+              if imp not in nextRemovals:
+                nextRemovals.append(imp)
+
+              if groupIndex + 1 + j == len(groups):
+                groups.append([])
+
+              groups[groupIndex + 1 + j].append(result)
+              print('REMOVED:')
+              print('{0} {1}'.format(groupIndex, group[i]))
+              print('{0} {1}'.format(groupIndex + j, imp))
+              print('ADDED:')
+              print('{0} {1}'.format(groupIndex + 1 + j, result))
+        for elem in nextRemovals:
+          groups[groupIndex + j].remove(elem)
     for elem in removals:
       group.remove(elem)
     removals = []
   if not didChange: shouldRunReduceCycle = False
+
+def printGroups():
+  print('RESULTS:')
+  for group in groupedImplicants:
+    print("Don't cares: {0}".format(len(group)))
+    print(group)
 
 if len(sys.argv) != 2:
   print('Usage: blifopt.py <blif_file>')
@@ -151,9 +212,6 @@ for i in range(len(blif.gates[0].terms)):
   implicants.append(blif.gates[0].terms[i].term)
 
 groupedImplicants = groupImplicants(implicants)
-for group in groupedImplicants:
-  print("Don't cares: {0}".format(len(group)))
-print("\n")
 
 shouldRunReduceCycle = True
 while shouldRunReduceCycle:
@@ -162,9 +220,4 @@ while shouldRunReduceCycle:
   removeRedundantImplicants(groupedImplicants)
   findLargerImplicants(groupedImplicants)
 
-for group in groupedImplicants:
-  print("Don't cares: {0}".format(len(group)))
-  #print("\n")
-  #print(group)
-  #print("\n")
-print('Done')
+printGroups()
