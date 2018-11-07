@@ -8,7 +8,7 @@ def removeDuplicates(implicants):
   for i in range(len(implicants)):
     for j in range(i + 1, len(implicants)):
       if implicants[i] == implicants[j]:
-        removals.append(implicants[i])
+        if implicants[i] not in removals: removals.append(implicants[i])
   for elem in removals:
     implicants.remove(elem)
 
@@ -139,21 +139,27 @@ def findLargerImplicants(groups):
         result = combineImplicants(group[i], group[j])
         if result != None:
           if not didChange: didChange = True
-          if group[i] not in removals:
-            removals.append(group[i])
-          if group[j] not in removals:
-            removals.append(group[j])
-          
-          # Add new implicant to the groups
-          if groupIndex + 1 == len(groups):
-            groups.append([])
-          
-          groups[groupIndex + 1].append(result)
-          print('REMOVED:')
-          print('{0} {1}'.format(groupIndex, group[i]))
-          print('{0} {1}'.format(groupIndex, group[j]))
-          print('ADDED:')
-          print('{0} {1}'.format(groupIndex + 1, result))
+          if result == group[i]:
+            if group[i] not in removals:
+              removals.append(group[i])
+              print('REMOVED:')
+              print('{0} {1}'.format(groupIndex, group[i]))
+          else:
+            if group[i] not in removals:
+              removals.append(group[i])
+            if group[j] not in removals:
+              removals.append(group[j])
+            
+            # Add new implicant to the groups
+            if groupIndex + 1 == len(groups):
+              groups.append([])
+            
+            groups[groupIndex + 1].append(result)
+            print('REMOVED:')
+            print('{0} {1}'.format(groupIndex, group[i]))
+            print('{0} {1}'.format(groupIndex, group[j]))
+            print('ADDED:')
+            print('{0} {1}'.format(groupIndex + 1, result))
       # Combine with the group above
       for j in range(1, len(groups) - groupIndex):
         nextRemovals = []
